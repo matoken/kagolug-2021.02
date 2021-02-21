@@ -1,0 +1,311 @@
+= スマートフォンをLinuxデスクトップのスピーカーに(してビデオ会議中に離席しても話に付いていけるようにする)
+Kenichiro Matohara(matoken) <maroken@kagolug.org>
+:revnumber: 1.0
+:revdate: 2021-02-21(Sun)
+:revremark: 鹿児島らぐ 02月のオフな集まり「{doctitle}」
+:homepage: https://matoken.org/
+:imagesdir: resources
+:data-uri:
+:backend: revealjs
+:revealjs_theme: serif
+:customcss: resources/my-css.css
+:revealjs_slideNumber: c/t
+:title-slide-transition: none
+:icons: font
+:revealjs_hash: true
+:revealjs_center: true
+:revealjs_autoPlayMedia: true
+:revealjs_transition: false  
+:revealjs_transitionSpeed: fast
+
+== link:https://matoken.org[Kenichiro Matohara(matoken) https://matoken.org]
+
+image::map.jpg[background, size=cover]
+
+* 南隅から参加(鹿児島の右下)
+* 好きなLinuxディストリビューションはDebian
+* お仕事募集 mailto:work＠matohara.org
+
+== 最近の発表
+
+* 「link:https://www.edocr.com/v/kwbbxp9n/matoken/BitbarSwiftBarLinux[Bitbar/SwiftBarをLinuxでも使いたい」] link:https://tokaidolug.connpass.com/event/198980/[東海道らぐ　あひる焼きさんのライトニングトークダービー！] 2021-01-23
+* 「link:https://www.edocr.com/v/jdemba8j/matoken/USB[ネットワーク経由でUSB共有]」 link:https://kagolug.connpass.com/event/200913/[鹿児島Linux勉強会 2021.01(オンライン開催)]　2021-01-31
+* 「link:https://wiki.matoken.org/study_meeting/2021#%E5%B0%8F%E6%B1%9F%E6%88%B8%E3%82%89%E3%81%90_2%E6%9C%88%E3%81%AE%E3%82%AA%E3%83%95%E3%81%AA%E9%9B%86%E3%81%BE%E3%82%8A_%E7%AC%AC223%E5%9B%9E_2021-02-13_sat[DroidCamでもスマホをWebCamにする]」 link:https://koedolug.connpass.com/event/201093/[小江戸らぐ 2月のオフな集まり(第223回)] 2021-02-13(sat)
+
+== スマートフォンをLinuxデスクトップのスピーカーに
+
+ビデオ会議中に離席しても話に付いていけるように
+
+* ちょっと飲みのものをとりに
+* ちょっとトイレに
+* ちょっとコンビニに
+
+話を聞き続けたい
+
+== 近距離
+
+* Bluetooth Headsetでマイクミュート
+* マイクミュートで音量を上げる
+
+== Wi-Fiのある範囲
+
+Wi-Fi経由でPCの音をスマートフォンに転送
+
+* link:https://k-tai.watch.impress.co.jp/docs/column/teppan/1305171.html[Web会議中に席を外す、音声だけでもスマホで聞きたいときに使うアプリ「AudioRelay」 - ケータイ Watch] Windows+Android用
+** link:https://audiorelay.net/[Stream your PC audio to your phone - AudioRelay]
+
+== Linux + Androidで動作するものを探す
+
+* link:https://alternativeto.net/software/audiorelay/?platform=linux[AudioRelay Alternatives for Linux | AlternativeTo]
+
+「SoundWire」，「WifiAudio」
+
+== 「SoundWire」
+
+SoundWireはWindow若しくはLinux x64_64(64bit)/x86(32bit)/Raspberry Pi OS(armhf)からAndroidへオーディオを転送
+
+* link:https://georgielabs.altervista.org/[GeorgieLabs]
+* link:https://play.google.com/store/apps/details?id=com.georgie.SoundWireFree[SoundWire (free) - Google Play のアプリ]
+* link:https://play.google.com/store/apps/details?id=com.georgie.SoundWire[SoundWire - Google Play のアプリ] ※有料版は未検証(10台まで利用できたり?)
+
+=== !
+
+* バイナリが配布されているので対応するそれを入手して展開，実行してAndroidアプリから接続すればオーディオが転送される
+* デスクトップファイルやアイコンも同梱されているので必要に応じて登録する
+* クローズドソース
+* ファイヤーウォール利用時はUDP:59010を開放(起動オプションや環境変数でカスタマイズ可能)
+* `-nogui` オプションでX無しでも動作
+
+=== 実行例
+
+[source,shell]
+----
+$ tar tvf SoundWire_Server_linux64.tar.gz <1>
+drwxrwxrwx Georgie/None      0 2020-01-26 21:22 SoundWireServer/
+-rwxrwxrwx Georgie/None   2913 2020-01-16 09:00 SoundWireServer/INSTALL.txt
+-rwxrwxrwx Georgie/None   1393 2020-01-16 08:46 SoundWireServer/license.txt
+-rwxrwxrwx Georgie/None   2235 2014-09-16 09:08 SoundWireServer/opus_license.txt
+-rwxrwxrwx Georgie/None   1583 2014-09-16 09:09 SoundWireServer/readerwriterqueue_license.txt
+-rwxrwxrwx Georgie/None   6915 2020-01-26 21:22 SoundWireServer/README.txt
+-rwxrwxrwx Georgie/None    448 2019-12-31 11:00 SoundWireServer/SoundWire-Server.desktop
+-rwxrwxrwx Georgie/None 1611672 2020-01-16 11:55 SoundWireServer/SoundWireServer
+-rwxrwxrwx Georgie/None  237351 2012-11-22 17:28 SoundWireServer/sw-icon.xpm
+$ tar xf SoundWire_Server_linux64.tar.gz <2>
+$ clamscan SoundWireServer/SoundWireServer <3>
+$ ha512sum SoundWireServer/SoundWireServer
+a0c1da0afad9e94aef82e19b2555ccf33494ec56fdbd6193a838beae31cec58ca75cae1949f520db84c6793bab13c9c3283b519416bebb1c54bbd66b5c489676  SoundWireServer/SoundWireServer
+$ SoundWireServer/SoundWireServer <4>
+----
+
+=== !
+
+<1> アーカイブの確認
+<2> アーカイブの展開
+<3> 念の為手動でもウィルス確認
+<4> 実行
+
+=== 実行画面(Linux)
+
+image:SoundWire_PC.jpg[]
+
+=== 実行画面(Android)
+
+image:SoundWire_Android.jpg[]
+
+=== !
+
+* 再生デバイスに迷った場合は `pavucontrol` などで `Recordicg` タブでプルダウンメニューからデバイスを順番に試していくといい
+** 音は出るけどノイズが多い場合はスピーカーからの音を拾っているマイクデバイスを選んでいる
+
+**※以降のアプリでも同じ**
+
+== 「WifiAudio」
+
+「WifiAudio」はWindows若しくはLinux x86_64(64bit)からAndroidへオーディオを転送してくれる
+
+* link:https://wifiaudio.boards.net/[Home | WiFiAudio - Use Android Device as Wireless speaker for Windows/Linux]
+* link:https://play.google.com/store/apps/details?id=com.vnd.wifi_audio[wireless speaker for android - Google Play のアプリ]
+* link:https://wifiaudio.boards.net/thread/2/wifiaudio-support-links-download-application[Wifiaudio Support and Links to Download PC application | WiFiAudio - Use Android Device as Wireless speaker for Windows/Linux] PC側バイナリ ※ダウンロードするにはフォーラムに登録が必要
+
+=== 実行例
+
+[source,shell]
+----
+$ clamscan ./wifiaudio_linux <1>
+$ chmod u+x ./wifiaudio_linux <2>
+$ ./wifiaudio_linux <3>
+----
+
+<1> 念の為手動でもウィルス確認
+<2> 実行権付与
+<3> 実行
+
+=== 利用ポート
+
+[source,shell]
+----
+$ lsof -i | grep wifiaudio
+wifiaudio 1818239 matoken   12u  IPv4 15191466      0t0  UDP *:32000 
+----
+
+利用ポートを確認すると UDP:32000 のようなのでファイアウォールを利用している場合は開放する
+
+=== 実行画面(PC)
+
+image::WiFiAudio_PC.jpg[]
+
+=== 実行画面(Android)
+
+image::WiFiAudio_Android.jpg[]
+
+== 「ffmpegとVLC」
+
+* クローズドソースのものしか見当たらないので例によってffmpegで試す
+* デスクトップアプリケーションの音声をキャプチャしてmp3形式でスマートフォンのipアドレスに配信
+
+=== !
+
+----
++--------------+
+|Linux Desktop |
+| Applications |
++---+----------+
+    |
+    | PulseAudio
+    |
+    |   +---------+   +--------+                       +------------+
+    +---+ monitor +---+ ffmpeg +-------))) Wi-Fi (((---| SmartPhone |   +---------+
+    |   +---------+   +--------+           mp3         |      VLC   +---| Speaker |
+    |                                                  +------------+   +---------+
+    |   +---------+
+    +---+ Speaker |
+        +---------+
+----
+
+== 実行例
+
+[source,shell]
+----
+$ pactl list short sources <1>
+0       alsa_output.pci-0000_00_1b.0.analog-stereo.monitor      module-alsa-card.c      s16le 2ch 44100Hz       RUNNING
+1       alsa_input.pci-0000_00_1b.0.analog-stereo       module-alsa-card.c      s16le 2ch 48000Hz       RUNNING
+2       alsa_input.pci-0000_00_1b.0.analog-stereo.echo-cancel   module-echo-cancel.c    float32le 1ch 32000Hz   RUNNING
+3       alsa_output.pci-0000_00_1b.0.analog-stereo.echo-cancel.monitor  module-echo-cancel.c    float32le 1ch 32000Hz   RUNNING
+4       alsa_input.hw_Loopback_1_0      module-alsa-source.c    s16le 1ch 16000Hz       RUNNING
+$ ffmpeg -f pulse -i alsa_output.pci-0000_00_1b.0.analog-stereo.monitor -ac 2 \
+-acodec libmp3lame -f rtp rtp://10.42.0.90:1234/ <2>
+----
+
+<1> PulseAudioのデバイスを確認
+<2> ffmpegでAndroidのIPに対してmp3形式で配信
+
+この状態でVLC等で `rtp://@:1234` を再生するとLinuxDesktopの音が流れて来る
+
+
+=== !
+
+* link:https://play.google.com/store/apps/details?id=org.videolan.vlc[VLC for Android - Google Play のアプリ]
+
+ffmpegのオプションについてはこのあたりを．
+
+* link:https://trac.ffmpeg.org/wiki/Capture/PulseAudio[Capture/PulseAudio – FFmpeg]
+* link:https://trac.ffmpeg.org/wiki/Capture/ALSA[Capture/ALSA – FFmpeg]
+* link:https://trac.ffmpeg.org/wiki/StreamingGuide[StreamingGuide – FFmpeg]
+
+=== !
+
+image:VLC_Android.jpg[]
+
+== スマートフォンのIPアドレス
+
+* mDNSが使えなさそうなので固定IPにしたりマルチキャスト配信してしまってもいいかも
+* 今回はarpでごまかしてみた
+
+[source,shell]
+----
+#!/bin/bash
+
+MONITOR=`pactl list short sources | grep analog-stereo.monitor | cut -f2 -d'    '`
+PHONE_MAC=18:d6:1c:00:00:00
+PHONE_IP=`arp -i wlp3s0 | grep ${PHONE_MAC} | cut -f1 -d' '`
+PORT=1234
+
+ffmpeg -f pulse -i ${MONITOR} -acodec libmp3lame -ar 22050 \
+-f rtp rtp://${PHONE_IP}:${PORT}/
+----
+
+== ちょっとコンビニまで
+
+* Wi-Fiの圏外でmobile回線を利用する
+* SoundWireでもルータのポート開放でできるという記述があるが面倒
+& お手軽なトンネリングサービスはUDP NGな場合が多い
+* Icecast2サーバを利用して配信してみる
+** 各種ライブ配信サービスも利用できるが公開範囲や内容に注意
+** Youtube Liveの場合音楽のみはNGで何らかの画像も一緒に配信する必要がある
+
+== ffmpegとicecast2
+
+* ffmpegでicecast2サーバにストリーミング
+* 受信端末でURLを開いて再生
+* 回線があれば世界中で受信できる :)
+** ffmpegの部分をOBS StudioにするとGUIなのでとっつきやすいと思う
+
+=== ffmpegでの配信例
+
+[source,shell]
+
+----
+$ ffmpeg -f pulse \ <1>
+-i alsa_output.platform-snd_aloop.0.analog-stereo.monitor \ <2>
+-loglevel 31 -stats -f adts \ <3>
+-content_type audio/aac \ <4>
+icecast://$USER:$PASS@icecast.example.com:8000/$MOUNTPOINT <5>
+----
+
+<1> pulseaudioを利用
+<2> インプットデバイス指定
+<3> ログレベル，配信形式指定
+<4> コンテンツタイプ指定
+<5> 配信ソースURL
+
+* link:https://wiki.matoken.org/webapp/icecast2[webapp:icecast2 [wiki.matoken.org]]
+* link:https://www.edocr.com/v/3bypxzrq/matoken/YoutubeLive[YoutubeLiveを細い回線で「聴く」 | edocr]
+
+== 応用?)各種ビデオ会議を配信
+
+* デスクトップキャプチャしつつエンコード&配信することでicecast2をはじめ各種サービスで配信可能
+* ffmpegやOBS Studioでキャプチャ&エンコード
+* Icecast2等でストリーミング
+
+=== VPSで配信
+
+* ローカルの回線やマシンスペックの問題がある場合VPSからの配信も可能
+* VPSだとサウンドカードが無いことが多いのでダミーデバイスを読み込んで利用する
+
+[source,shell]
+----
+$ sudo modprobe -v snd-dummy
+insmod /lib/modules/4.19.0-14-amd64/kernel/sound/drivers/snd-dummy.ko
+----
+
+* GUI操作はrdp/vnc/x2go等経由
+
+=== Discordを配信中 :)
+
+鹿児島からドイツのVPSを操作してDiscordに参加，東京のVPSに配信，ユーザは東京のVPS経由でPCやスマートフォンで受信 :)
+
+== まとめ
+
+* SoundWireとWifiAudioではSoundWireの方がおすすめ?
+* しかしわざわざ導入しなくてもffmpeg+VLCでいいのではという感じ
+* PC側では，ボリュームは反映されず音量0でも配信されるがミュートすると聞こえなくなるので注意
+* 
+
+== 奥付
+
+発表::
+link:https://kagolug.connpass.com/event/203393/[鹿児島Linux勉強会 2021.02(オンライン開催)] 2021-02-21(sun)
+発表者::
+link:https://matoken.org/[Kenichiro Matohara(matoken)]
+ライセンス::
+CC BY-NC-SA 4.0
